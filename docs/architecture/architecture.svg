@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1010" width="1200" height="1010" font-family="Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#333"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="1010" fill="#ffffff"/>
+
+  <text x="600" y="34" text-anchor="middle" font-size="24" font-weight="bold" fill="#111">Maison Memory: Architecture on Microsoft Fabric</text>
+  <text x="600" y="56" text-anchor="middle" font-size="13" fill="#555">Synthetic data for a fictional luxury house (Maison Cambon). Consent-aware client data product, medallion layers.</text>
+
+  <!-- Sources -->
+  <rect x="230" y="75" width="650" height="140" rx="10" fill="#f3f4f6" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="555" y="97" text-anchor="middle" font-size="15" font-weight="bold" fill="#111">SOURCES (synthetic, one set per region)</text>
+  <rect x="245" y="108" width="195" height="82" rx="6" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="342" y="127" text-anchor="middle" font-size="13" font-weight="bold">Americas (New York)</text>
+  <text x="342" y="145" text-anchor="middle" font-size="11.5" fill="#333">POS sales, e-commerce</text>
+  <text x="342" y="160" text-anchor="middle" font-size="11.5" fill="#333">CRM + consent flags</text>
+  <text x="342" y="175" text-anchor="middle" font-size="11.5" fill="#333">after-sales, appointments</text>
+  <rect x="460" y="108" width="195" height="82" rx="6" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="557" y="127" text-anchor="middle" font-size="13" font-weight="bold">Europe (Paris)</text>
+  <text x="557" y="145" text-anchor="middle" font-size="11.5" fill="#333">POS sales, e-commerce</text>
+  <text x="557" y="160" text-anchor="middle" font-size="11.5" fill="#333">CRM + consent flags</text>
+  <text x="557" y="175" text-anchor="middle" font-size="11.5" fill="#333">after-sales, appointments</text>
+  <rect x="675" y="108" width="195" height="82" rx="6" fill="#ffffff" stroke="#9ca3af"/>
+  <text x="772" y="127" text-anchor="middle" font-size="13" font-weight="bold">Asia-Pacific (Seoul)</text>
+  <text x="772" y="145" text-anchor="middle" font-size="11.5" fill="#333">POS sales, e-commerce</text>
+  <text x="772" y="160" text-anchor="middle" font-size="11.5" fill="#333">CRM + consent flags</text>
+  <text x="772" y="175" text-anchor="middle" font-size="11.5" fill="#333">after-sales, appointments</text>
+  <text x="555" y="207" text-anchor="middle" font-size="11.5" fill="#555">Reference data: product, boutique, fx_rate</text>
+
+  <line x1="555" y1="215" x2="555" y2="248" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Landing -->
+  <rect x="230" y="250" width="650" height="62" rx="10" fill="#e5e7eb" stroke="#6b7280" stroke-width="1.5"/>
+  <text x="555" y="275" text-anchor="middle" font-size="15" font-weight="bold">LANDING (OneLake Files)</text>
+  <text x="555" y="296" text-anchor="middle" font-size="12" fill="#333">Raw files exactly as received, one folder per region and day. Late files expected.</text>
+
+  <line x1="555" y1="312" x2="555" y2="348" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Bronze -->
+  <rect x="230" y="350" width="650" height="82" rx="10" fill="#fde7c8" stroke="#b7791f" stroke-width="1.5"/>
+  <text x="555" y="375" text-anchor="middle" font-size="15" font-weight="bold">BRONZE (Lakehouse, Delta tables)</text>
+  <text x="555" y="396" text-anchor="middle" font-size="12" fill="#333">Raw data kept as is, stamped with batch ID and load time</text>
+  <text x="555" y="414" text-anchor="middle" font-size="12" fill="#333">Schema changes absorbed without breaking the load</text>
+
+  <line x1="555" y1="432" x2="555" y2="468" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Silver -->
+  <rect x="230" y="470" width="650" height="102" rx="10" fill="#dbe4ee" stroke="#4a6785" stroke-width="1.5"/>
+  <text x="555" y="495" text-anchor="middle" font-size="15" font-weight="bold">SILVER (Lakehouse, PySpark, Delta)</text>
+  <text x="555" y="516" text-anchor="middle" font-size="12" fill="#333">Typed and cleaned, duplicates removed, currencies standardized</text>
+  <text x="555" y="534" text-anchor="middle" font-size="12" fill="#333">Identity matching across regions (hashed email, then name + phone)</text>
+  <text x="555" y="552" text-anchor="middle" font-size="12" fill="#333">Bad rows go to quarantine. Client history kept over time.</text>
+
+  <line x1="555" y1="572" x2="555" y2="608" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Gold -->
+  <rect x="230" y="610" width="650" height="122" rx="10" fill="#fff3bf" stroke="#b59a1a" stroke-width="1.5"/>
+  <text x="555" y="635" text-anchor="middle" font-size="15" font-weight="bold">GOLD (Warehouse, SQL)</text>
+  <text x="555" y="656" text-anchor="middle" font-size="12" fill="#333">dim_client (tier history), client_identity_map (match rule + confidence)</text>
+  <text x="555" y="674" text-anchor="middle" font-size="12" fill="#333">fact_sales, fact_after_sales, client_360</text>
+  <text x="555" y="696" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Consent-aware views: each region sees only what rules allow</text>
+  <text x="555" y="714" text-anchor="middle" font-size="12" fill="#333">Retention job: prospects 3 years, clients 10 years</text>
+
+  <line x1="555" y1="732" x2="555" y2="768" stroke="#333" stroke-width="2" marker-end="url(#arr)"/>
+
+  <!-- Consumption -->
+  <rect x="230" y="770" width="650" height="100" rx="10" fill="#d9f2e1" stroke="#2f855a" stroke-width="1.5"/>
+  <text x="555" y="795" text-anchor="middle" font-size="15" font-weight="bold">CONSUMPTION (Power BI in Fabric)</text>
+  <text x="555" y="816" text-anchor="middle" font-size="12" fill="#333">Page 1, Client Insights: VIC tiers, retention, cross-category buying, regional trends</text>
+  <text x="555" y="834" text-anchor="middle" font-size="12" fill="#333">Page 2, Pipeline Health: freshness, data quality, failures by class</text>
+  <text x="555" y="852" text-anchor="middle" font-size="12" fill="#555">Optional: advisor brief generated from the gold layer</text>
+
+  <!-- Left band: orchestration -->
+  <rect x="30" y="250" width="170" height="482" rx="10" fill="#ede9fe" stroke="#6d28d9" stroke-width="1.5"/>
+  <text x="115" y="278" text-anchor="middle" font-size="14" font-weight="bold">ORCHESTRATION</text>
+  <text x="115" y="298" text-anchor="middle" font-size="12">Fabric Data Factory</text>
+  <text x="115" y="314" text-anchor="middle" font-size="12">pipeline</text>
+  <text x="115" y="350" text-anchor="middle" font-size="12" fill="#333">Runs layers in order</text>
+  <text x="115" y="380" text-anchor="middle" font-size="12" fill="#333">Restartable loads</text>
+  <text x="115" y="410" text-anchor="middle" font-size="12" fill="#333">Idempotent (MERGE),</text>
+  <text x="115" y="426" text-anchor="middle" font-size="12" fill="#333">safe to run twice</text>
+  <text x="115" y="456" text-anchor="middle" font-size="12" fill="#333">Retries and controlled</text>
+  <text x="115" y="472" text-anchor="middle" font-size="12" fill="#333">reprocessing</text>
+  <text x="115" y="502" text-anchor="middle" font-size="12" fill="#333">Dependency handling</text>
+  <line x1="200" y1="281" x2="230" y2="281" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="200" y1="391" x2="230" y2="391" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="200" y1="521" x2="230" y2="521" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="200" y1="671" x2="230" y2="671" stroke="#6d28d9" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+  <!-- Right band: control and trust -->
+  <rect x="910" y="250" width="260" height="482" rx="10" fill="#fee2e2" stroke="#b91c1c" stroke-width="1.5"/>
+  <text x="1040" y="278" text-anchor="middle" font-size="14" font-weight="bold">CONTROL AND TRUST</text>
+  <text x="1040" y="298" text-anchor="middle" font-size="12">Control tables in the Lakehouse</text>
+  <text x="1040" y="334" text-anchor="middle" font-size="12" fill="#333">Run log: batch, status, row counts</text>
+  <text x="1040" y="362" text-anchor="middle" font-size="12" fill="#333">Data quality results per rule</text>
+  <text x="1040" y="390" text-anchor="middle" font-size="12" fill="#333">Quarantine table for bad records</text>
+  <text x="1040" y="418" text-anchor="middle" font-size="12" fill="#333">Reconciliation: layer totals</text>
+  <text x="1040" y="434" text-anchor="middle" font-size="12" fill="#333">match the source</text>
+  <text x="1040" y="466" text-anchor="middle" font-size="12" font-weight="bold" fill="#333">Failure classes:</text>
+  <text x="1040" y="486" text-anchor="middle" font-size="12" fill="#333">source, integration, processing,</text>
+  <text x="1040" y="502" text-anchor="middle" font-size="12" fill="#333">orchestration, consumption</text>
+  <text x="1040" y="534" text-anchor="middle" font-size="12" fill="#333">Alerts and lineage notes</text>
+  <line x1="880" y1="281" x2="910" y2="281" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="880" y1="391" x2="910" y2="391" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="880" y1="521" x2="910" y2="521" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="5,4"/>
+  <line x1="880" y1="671" x2="910" y2="671" stroke="#b91c1c" stroke-width="1.5" stroke-dasharray="5,4"/>
+
+  <!-- DataOps band -->
+  <rect x="30" y="900" width="1140" height="80" rx="10" fill="#e0f2fe" stroke="#0369a1" stroke-width="1.5"/>
+  <text x="600" y="925" text-anchor="middle" font-size="14" font-weight="bold">DATAOPS (applies to every layer)</text>
+  <text x="600" y="948" text-anchor="middle" font-size="12" fill="#333">Git integration and code review  |  Deployment pipelines: dev to test to prod  |  Automated unit, integration and reconciliation tests</text>
+  <text x="600" y="966" text-anchor="middle" font-size="12" fill="#333">Source-to-target mappings  |  Runbook and support handoff  |  Rollback plan and release evidence</text>
+</svg>
