@@ -124,6 +124,7 @@ RATES = {
     "return_fashion_jewelry": 0.05,
     "return_beauty": 0.03,
     "ticket": 0.035,
+    "cross_region_service": 0.15,  # share of repairs done in the other region, for two-region clients
     "consent_update": 0.03,
     "contact_update": 0.02,
     "missing_email": 0.05,
@@ -143,7 +144,7 @@ COLUMNS = {
     "ecom_order": ["order_id", "client_id", "product_id", "quantity", "unit_price",
                    "currency", "is_return", "order_ts"],
     "after_sales_ticket": ["ticket_id", "client_id", "boutique_id", "product_id", "status",
-                           "reason", "created_at", "closed_at"],
+                           "reason", "created_at", "closed_at", "purchase_region"],
     "appointment": ["appointment_id", "client_id", "boutique_id", "advisor_id",
                     "appointment_ts", "status"],
 }
@@ -539,7 +540,7 @@ class Generator:
 
                     ret_p = RATES["return_beauty"] if cat == "Fragrance and Beauty" else RATES["return_fashion_jewelry"]
                     if rng.random() < ret_p:
-                        ridx = idx + int(rng.integers(2, 31))
+                        ridx = idx + int(rng.integers(1, 15))  # 14-day return window
                         if ridx <= days - 1:
                             ret = dict(row, idx=ridx, quantity=-qty, is_return=1,
                                        secs=int(rng.integers(10 * 3600, 19 * 3600)))
@@ -555,9 +556,18 @@ class Generator:
                             if status == "closed":
                                 closed_ts = self.ts(min(days - 1, cidx + int(rng.integers(3, 61))),
                                                     int(rng.integers(9 * 3600, 18 * 3600)))
+                            # A few repairs happen in the other region, for clients who have a record there.
+                            svc = rec
+                            if len(recs) == 2 and rng.random() < RATES["cross_region_service"]:
+                                other = recs[1] if rec is recs[0] else recs[0]
+                                if max(other["created_idx"], 0) <= cidx:
+                                    svc = other
+                                    self.issues["cross_region_repairs"] += 1
+                            svc_boutique = (boutique_id if svc is rec and boutique_id
+                                            else svc["boutique"]["boutique_id"])
                             self.tickets.append(dict(
-                                region=rec["region"], idx=cidx, rec=rec,
-                                boutique_id=boutique_id or rec["boutique"]["boutique_id"], product_id=pid,
+                                region=svc["region"], idx=cidx, rec=svc, purchase_region=rec["region"],
+                                boutique_id=svc_boutique, product_id=pid,
                                 status=status, reason=self.pick(TICKET_REASONS),
                                 created_ts=self.ts(cidx, int(rng.integers(9 * 3600, 18 * 3600))),
                                 closed_ts=closed_ts))
@@ -627,7 +637,7 @@ class Generator:
             b[t["region"]]["after_sales_ticket"][t["idx"]].append(dict(
                 ticket_id=t["id"], client_id=t["rec"]["client_id"], boutique_id=t["boutique_id"],
                 product_id=t["product_id"], status=t["status"], reason=t["reason"],
-                created_at=t["created_ts"], closed_at=t["closed_ts"]))
+                created_at=t["created_ts"], closed_at=t["closed_ts"], purchase_region=t["purchase_region"]))
         for a in self.appts:
             b[a["region"]]["appointment"][a["idx"]].append(dict(
                 appointment_id=a["id"], client_id=a["rec"]["client_id"], boutique_id=a["boutique_id"],
