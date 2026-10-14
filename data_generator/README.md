@@ -31,7 +31,7 @@ Default size: about 5,000 people (5,273 CRM records), about 100,000 sales rows p
 | `crm_client` | each region | First day holds the existing base, later days hold new clients and changes |
 | `pos_transaction` | each region | One product per row, boutique sales |
 | `ecom_order` | each region | One product per row, online orders |
-| `after_sales_ticket` | each region | Repairs and services, status changes by age |
+| `after_sales_ticket` | each region | Repairs and services, status changes by age, `purchase_region` column |
 | `appointment` | each region | Mostly VIC and high spenders |
 | `product`, `boutique`, `fx_rate` | reference | `fx_rate` has weekdays only |
 
@@ -55,13 +55,17 @@ Timestamps are local time of the region, with no time zone. Prices are local pri
 | File has fewer rows than the manifest promises | Reconciliation failure | 5 |
 | Europe `crm_client` gains `client_segment` in week 3 | Absorb the new column | from day 21 |
 | Americas `pos_transaction` gains `sales_associate_id` | Absorb the new column | from day 120 |
-| Returns as negative quantities | Handle in net sales | about 3,800 |
+| Returns as negative quantities, 1 to 14 days after the sale | Handle in net sales | about 3,800 |
+| Repair done in a different region than the purchase | Keep `purchase_region` and the servicing region apart | 13 |
 | Mixed currencies, no weekend FX rates | Convert with the last known rate | all |
 
 Counts are exact for seed 42 and can shift slightly with a different seed.
 
 ## Design choices
 
+- **Return window is 14 days.** Chanel's US returns FAQ states 14 days from purchase, in person, in the country of purchase. Generated returns follow that.
+- **Cross-region repairs are a rule, not a fact.** Chanel's public pages say a piece can be dropped at any boutique but do not say whether the country of purchase matters. About 15 percent of repairs for clients who have a record in two regions are filed in the other region, with `purchase_region` showing where the item was bought. This is a design assumption.
+- **`client_segment` is a neutral hint.** Customer care and public articles describe no tiered program, only informal handling of top spenders, so the column is a source-system hint and not a claimed Chanel tier.
 - **Purchases stay in the region where they happen.** Only people registered in two regions have activity in both, which mirrors the idea that a client is a separate record in each region until the data product links them.
 - **Prospects** are people with no purchases. About 40 percent of them were created more than three years before the start date so the retention job has something to remove.
 - **Names** are romanized so fuzzy matching is a fair test, not a script problem.

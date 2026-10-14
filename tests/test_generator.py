@@ -109,6 +109,29 @@ def test_duplicate_rows_are_resent(out):
     assert dupes.sum() >= 2
 
 
+def test_returns_within_14_days(out):
+    pos = read_all(out, "pos_transaction")
+    pos = pos[pos["transaction_id"].notna()].drop_duplicates("transaction_id")
+    pos["d"] = pd.to_datetime(pos["transaction_ts"].str[:10], errors="coerce")
+    sales = pos[pos["is_return"] == "0"]
+    rets = pos[pos["is_return"] == "1"]
+    assert len(rets) > 0
+    m = rets.merge(sales, on=["client_id", "product_id"], suffixes=("_r", "_s"))
+    m["gap"] = (m["d_r"] - m["d_s"]).dt.days
+    # a return matches some earlier sale of the same product within 14 days
+    ok = m[(m["gap"] >= 1) & (m["gap"] <= 14)]["transaction_id_r"].nunique()
+    assert ok / len(rets) > 0.9
+
+
+def test_some_repairs_happen_in_other_region(tmp_path):
+    gd.generate(tmp_path, n_people=2500, seed=11, verbose=False)
+    out = tmp_path
+    t = read_all(out, "after_sales_ticket")
+    assert "purchase_region" in t.columns
+    assert (t["purchase_region"] != t["_region"]).sum() >= 1
+    assert (t["purchase_region"] == t["_region"]).mean() > 0.8
+
+
 def test_fx_has_no_weekends(out):
     fx = pd.read_csv(out / "raw" / "reference" / "fx_rate.csv", parse_dates=["rate_date"])
     assert (fx["rate_date"].dt.weekday < 5).all()
