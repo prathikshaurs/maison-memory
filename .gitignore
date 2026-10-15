@@ -222,3 +222,8 @@ __marimo__/
 data/raw/
 .venv/
 data/raw/
+data/
+maison_raw.zip
+.venv/
+__pycache__/
+.ipynb_checkpoints/
