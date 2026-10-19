@@ -227,3 +227,4 @@ maison_raw.zip
 .venv/
 __pycache__/
 .ipynb_checkpoints/
+.DS_Store
