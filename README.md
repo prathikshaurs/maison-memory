@@ -1,4 +1,5 @@
 # Maison Memory
+![tests](https://github.com/prathikshaurs/maison-memory/actions/workflows/ci.yml/badge.svg)
 
 **What if every advisor recognized a top client the moment she walked in, in any city, without breaking her consent?**
 
