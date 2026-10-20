@@ -90,8 +90,8 @@ The notebooks run in a Microsoft Fabric workspace. Import them from `notebooks/`
 
 | Measure | Value |
 |---|---|
-| Identity match precision | FILL FROM nb_29 |
-| Identity match recall | FILL FROM nb_29 |
+| Identity match precision | 1.00 |
+| Identity match recall | 0.747 |
 | Gold reconciliation checks | All pass |
 | Automated tests | 47 pass in GitHub Actions |
 
