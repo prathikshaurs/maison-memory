@@ -70,22 +70,6 @@ docs/
 powerbi/            Report description and screenshots
 ```
 
-## Getting started
-
-Generate the data and run the tests on your own machine:
-
-```bash
-git clone https://github.com/prathikshaurs/maison-memory.git
-cd maison-memory
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements-dev.txt
-python3 -m pytest -q
-python3 data_generator/generate_data.py --help
-```
-
-The notebooks run in a Microsoft Fabric workspace. Import them from `notebooks/`, upload the generated files to the Lakehouse `landing` folder, then run `nb_90_run_pipeline`.
-
 ## Results
 
 | Measure | Value |
