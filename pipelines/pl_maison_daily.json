@@ -1,0 +1,231 @@
+{
+    "name": "pl_maison_daily",
+    "objectId": "e43b236f-034e-4d70-ac09-aee84ac59f3b",
+    "properties": {
+        "activities": [
+            {
+                "name": "Run data product",
+                "type": "TridentNotebook",
+                "dependsOn": [],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "notebookId": "03ad98be-ecec-45a3-88dd-da133d1a49db",
+                    "workspaceId": "64979e19-a5a4-40e9-9bad-e1f466de8ca7",
+                    "parameters": {
+                        "PIPELINE_NAME": {
+                            "value": "pl_maison_daily",
+                            "type": "string"
+                        },
+                        "PIPELINE_RUN_ID": {
+                            "value": "@pipeline().RunId",
+                            "type": "string"
+                        },
+                        "SIMULATE_FAILURE": {
+                            "value": "",
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Load gold",
+                "type": "Script",
+                "dependsOn": [
+                    {
+                        "activity": "Run data product",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "linkedService": {
+                    "name": "maison_gold",
+                    "properties": {
+                        "annotations": [],
+                        "type": "DataWarehouse",
+                        "typeProperties": {
+                            "endpoint": "qhbo5kfdvkxe3le3ti4yxeqv44-dgpjozfeuxuubg5n4h2gnxumu4.datawarehouse.fabric.microsoft.com",
+                            "artifactId": "baf0292a-ea95-4df3-b092-5111c2ddc5be",
+                            "workspaceId": "64979e19-a5a4-40e9-9bad-e1f466de8ca7"
+                        }
+                    }
+                },
+                "typeProperties": {
+                    "scripts": [
+                        {
+                            "type": "NonQuery",
+                            "text": {
+                                "value": "-- 01_load_from_lakehouse.sql\n-- Copies the gold tables built by nb_30_gold_build from the Lakehouse into the Warehouse.\n-- Needs the Lakehouse 'lh_maison' added to this Warehouse in the Explorer (+ Warehouses / Lakehouses).\n-- Run again after every nb_30 run. The views in 02 and 03 stay in place.\n\nDROP TABLE IF EXISTS dbo.dim_client;\nCREATE TABLE dbo.dim_client AS\nSELECT * FROM lh_maison.dbo.gold_dim_client;\n\nDROP TABLE IF EXISTS dbo.dim_product;\nCREATE TABLE dbo.dim_product AS\nSELECT * FROM lh_maison.dbo.gold_dim_product;\n\nDROP TABLE IF EXISTS dbo.dim_boutique;\nCREATE TABLE dbo.dim_boutique AS\nSELECT * FROM lh_maison.dbo.gold_dim_boutique;\n\nDROP TABLE IF EXISTS dbo.dim_date;\nCREATE TABLE dbo.dim_date AS\nSELECT * FROM lh_maison.dbo.gold_dim_date;\n\nDROP TABLE IF EXISTS dbo.fact_sales;\nCREATE TABLE dbo.fact_sales AS\nSELECT * FROM lh_maison.dbo.gold_fact_sales;\n\nDROP TABLE IF EXISTS dbo.fact_after_sales;\nCREATE TABLE dbo.fact_after_sales AS\nSELECT * FROM lh_maison.dbo.gold_fact_after_sales;\n\nDROP TABLE IF EXISTS dbo.fact_appointment;\nCREATE TABLE dbo.fact_appointment AS\nSELECT * FROM lh_maison.dbo.gold_fact_appointment;\n\nDROP TABLE IF EXISTS dbo.client_identity_map;\nCREATE TABLE dbo.client_identity_map AS\nSELECT * FROM lh_maison.dbo.gold_client_identity_map;\n\nDROP TABLE IF EXISTS dbo.client_360;\nCREATE TABLE dbo.client_360 AS\nSELECT * FROM lh_maison.dbo.gold_client_360;\n\nDROP TABLE IF EXISTS dbo.person_360_global;\nCREATE TABLE dbo.person_360_global AS\nSELECT * FROM lh_maison.dbo.gold_person_360_global;\n\nDROP TABLE IF EXISTS dbo.governance_summary;\nCREATE TABLE dbo.governance_summary AS\nSELECT * FROM lh_maison.dbo.gold_governance_summary;",
+                                "type": "Expression"
+                            }
+                        }
+                    ],
+                    "scriptBlockExecutionTimeout": "02:00:00"
+                }
+            },
+            {
+                "name": "Log load ok",
+                "type": "TridentNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Load gold",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "notebookId": "f6d52258-6e7d-4c22-af25-9e87c5c322f2",
+                    "workspaceId": "64979e19-a5a4-40e9-9bad-e1f466de8ca7",
+                    "parameters": {
+                        "PIPELINE_NAME": {
+                            "value": "pl_maison_daily",
+                            "type": "string"
+                        },
+                        "PIPELINE_RUN_ID": {
+                            "value": "@pipeline().RunId",
+                            "type": "string"
+                        },
+                        "STATUS": {
+                            "value": "success",
+                            "type": "string"
+                        },
+                        "ERROR_MESSAGE": {
+                            "value": "",
+                            "type": "string"
+                        },
+                        "STEP_NAME": {
+                            "value": "warehouse_load",
+                            "type": "string"
+                        },
+                        "STEP_ORDER": {
+                            "value": "7",
+                            "type": "int"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Log load failed",
+                "type": "TridentNotebook",
+                "dependsOn": [
+                    {
+                        "activity": "Load gold",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "policy": {
+                    "timeout": "0.12:00:00",
+                    "retry": 0,
+                    "retryIntervalInSeconds": 30,
+                    "secureOutput": false,
+                    "secureInput": false
+                },
+                "typeProperties": {
+                    "notebookId": "f6d52258-6e7d-4c22-af25-9e87c5c322f2",
+                    "workspaceId": "64979e19-a5a4-40e9-9bad-e1f466de8ca7",
+                    "parameters": {
+                        "PIPELINE_NAME": {
+                            "value": "pl_maison_daily",
+                            "type": "string"
+                        },
+                        "PIPELINE_RUN_ID": {
+                            "value": "@pipeline().RunId",
+                            "type": "string"
+                        },
+                        "STATUS": {
+                            "value": "failed",
+                            "type": "string"
+                        },
+                        "ERROR_MESSAGE": {
+                            "value": "@activity('Load gold').error.message",
+                            "type": "string"
+                        },
+                        "STEP_NAME": {
+                            "value": "warehouse_load",
+                            "type": "string"
+                        },
+                        "STEP_ORDER": {
+                            "value": "7",
+                            "type": "int"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Alert run failed",
+                "type": "Office365Outlook",
+                "dependsOn": [
+                    {
+                        "activity": "Run data product",
+                        "dependencyConditions": [
+                            "Failed"
+                        ]
+                    }
+                ],
+                "typeProperties": {
+                    "inputs": {
+                        "method": "post",
+                        "path": "/v2/Mail",
+                        "body": {
+                            "To": "alerts@example.com",
+                            "Subject": "Maison Memory: data product failed",
+                            "Body": "<p>@{concat('Run ', pipeline().RunId, ' failed. ', activity('Run data product').error.message)}</p>",
+                            "Sensitivity": "",
+                            "Importance": "Normal"
+                        }
+                    }
+                }
+            },
+            {
+                "name": "Alert load failed",
+                "type": "Office365Outlook",
+                "dependsOn": [
+                    {
+                        "activity": "Log load failed",
+                        "dependencyConditions": [
+                            "Succeeded"
+                        ]
+                    }
+                ],
+                "typeProperties": {
+                    "inputs": {
+                        "method": "post",
+                        "path": "/v2/Mail",
+                        "body": {
+                            "To": "alerts@example.com",
+                            "Subject": "Maison Memory: Warehouse load failed",
+                            "Body": "<p>@{concat('Run ', pipeline().RunId, ' finished the notebooks but failed while loading the gold tables into the Warehouse. Error: ', activity('Load gold').error.message)}</p>",
+                            "Sensitivity": "",
+                            "Importance": "Normal"
+                        }
+                    }
+                }
+            }
+        ],
+        "lastModifiedByObjectId": "77df1359-3199-439d-ab12-9e6f043586e8",
+        "lastPublishTime": "2026-10-19T23:12:36Z"
+    }
+}
