@@ -1,4 +1,5 @@
 # Maison Memory
+
 ![tests](https://github.com/prathikshaurs/maison-memory/actions/workflows/ci.yml/badge.svg)
 
 **What if every advisor recognized a top client the moment she walked in, in any city, without breaking her consent?**
@@ -16,7 +17,7 @@ A client might buy a bag in New York, get a repair in Seoul and order skincare o
 - Ingests raw files from three regions (Americas, Europe, Asia-Pacific) into a **medallion architecture** (bronze, silver, gold)
 - Matches the same client across regions and records how each match was made
 - Applies **consent rules** so a region only sees what the client allows
-- Keeps **client history** (for example VIC tier changes) over time
+- Keeps **client history** (consent, contact and segment changes) over time, and applies **retention and erasure** rules
 - Embeds **data quality checks, reconciliation, quarantine and failure classification** in every run
 - Delivers a **Power BI report** with two pages: Client Insights and Pipeline Health
 
@@ -34,8 +35,8 @@ Full design: [docs/architecture/design.md](docs/architecture/design.md)
 | Orchestration | Fabric Data Factory pipelines |
 | Processing | PySpark notebooks, SQL, Delta Lake |
 | Reporting | Power BI |
-| DataOps | Git integration, deployment pipelines, pytest |
-| Data generation | Python (pandas, Faker, pyarrow) |
+| DataOps | Git, pytest, GitHub Actions |
+| Data generation | Python (pandas, numpy, Faker) |
 
 ## Key engineering ideas
 
@@ -50,44 +51,63 @@ Full design: [docs/architecture/design.md](docs/architecture/design.md)
 ## Repository structure
 
 ```
-data_generator/     Python scripts that create the synthetic regional data
+data_generator/     Python script that creates the synthetic regional data
 data/raw/           Generated files (not committed)
 notebooks/
-  bronze/           Raw to Delta
-  silver/           Cleaning, matching, history
+  bronze/           Raw files to Delta
+  silver/           Cleaning, sales, history and retention, identity matching
   gold/             Business-ready tables
-pipelines/          Orchestration definitions
-tests/              Automated tests
+  eval/             Identity match accuracy against ground truth
+  orchestration/    Pipeline driver and load logging
+pipelines/          Pipeline definition (JSON)
+sql/gold/           Warehouse load, regional views, security, checks
+tests/              pytest tests, run by GitHub Actions
 docs/
-  architecture/     Design doc and diagram
+  architecture/     Design, as-built notes and diagram
   runbooks/         Failure classes and recovery steps
-  mappings/         Source-to-target mappings
-powerbi/            Report files and notes
+  mappings/         Source-to-target mapping
+  images/           Report and pipeline screenshots
+powerbi/            Report description and screenshots
 ```
 
 ## Getting started
 
-Setup steps will be added as each part is built.
+Generate the data and run the tests on your own machine:
 
 ```bash
-git clone https://github.com/<your-username>/maison-memory.git
+git clone https://github.com/prathikshaurs/maison-memory.git
 cd maison-memory
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
+python3 -m pytest -q
+python3 data_generator/generate_data.py --help
 ```
+
+The notebooks run in a Microsoft Fabric workspace. Import them from `notebooks/`, upload the generated files to the Lakehouse `landing` folder, then run `nb_90_run_pipeline`.
+
+## Results
+
+| Measure | Value |
+|---|---|
+| Identity match precision | FILL FROM nb_29 |
+| Identity match recall | FILL FROM nb_29 |
+| Gold reconciliation checks | All pass |
+| Automated tests | 47 pass in GitHub Actions |
+
+Details and limits: [runbook](docs/runbooks/runbook.md), [as built](docs/architecture/as_built.md), [mappings](docs/mappings/source_to_target.md), [Power BI](powerbi/README.md).
 
 ## Status
 
 - [x] Design and architecture
-- [ ] Synthetic data generator
-- [ ] Bronze layer
-- [ ] Silver layer
-- [ ] Gold layer
-- [ ] Orchestration and control tables
-- [ ] Tests and CI
-- [ ] Power BI report
-- [ ] Runbook and mappings
+- [x] Synthetic data generator
+- [x] Bronze layer
+- [x] Silver layer
+- [x] Gold layer and Warehouse views
+- [x] Orchestration, control tables and failure classification
+- [x] Tests and CI
+- [x] Power BI report
+- [x] Runbook and mappings
 
 ## About
 
